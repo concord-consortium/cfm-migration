@@ -12,15 +12,25 @@ const fromCommonMWInteractivesSql = `
 `
 const getMWInteractivesInfoSql = `select la.id as activityId, la.name as activityName, mw.id as mwId, mw.url as mwUrl ${fromCommonMWInteractivesSql}`
 
-const getRunStatesSql = `
-  select id, interactive_id, raw_data
-  from interactive_run_states
-  where interactive_type = 'MwInteractive'
-    and interactive_id in(select mw.id ${fromCommonMWInteractivesSql});
+const getAllRunStatesSql = `
+  select irs.id, irs.interactive_id, irs.raw_data, irs.metadata, r.key as run_key, u.email, r.context_id, r.platform_id, r.platform_user_id
+  from interactive_run_states irs
+  left join runs r on irs.run_id = r.id
+  left join users u on r.user_id = u.id
+  where irs.interactive_type = 'MwInteractive'
+    and irs.interactive_id in(select mw.id ${fromCommonMWInteractivesSql})
+`
+
+const getRunStatesWithIdsSql = (ids: string) => `
+  select irs.id, irs.interactive_id, irs.raw_data, irs.metadata, r.key as run_key, u.email, r.context_id, r.platform_id, r.platform_user_id
+  from interactive_run_states irs
+  left join runs r on irs.run_id = r.id
+  left join users u on r.user_id = u.id
+  where irs.id in (${ids})
 `
 
 const laraPull = (env: string, laraConfig: LaraConfig) => {
-  const {ecsHost, ecsUser, ecsKey, dbHost, dbPassword} = laraConfig;
+  const {ecsHost, ecsUser, ecsKey, dbHost, dbPassword, irsIdFilter} = laraConfig;
 
   connect({ecsHost, ecsUser, ecsKey, dbHost, dbPassword})
     .then(([conn, done]) => {
@@ -32,8 +42,16 @@ const laraPull = (env: string, laraConfig: LaraConfig) => {
           }
           writeFile(env, "lara-mwurls.json", results)
 
-          log("Querying for interactive_run_states")
-          conn.query(getRunStatesSql,
+          let sql:string
+          if (irsIdFilter && irsIdFilter.length > 0) {
+            sql = getRunStatesWithIdsSql(irsIdFilter);
+            log(`Querying for interactive_run_states with ids: ${irsIdFilter}`)
+          } else {
+            sql = getAllRunStatesSql;
+            log("Querying for all interactive_run_states")
+          }
+
+          conn.query(sql,
             (err, results) => {
               if (err) {
                 die(err.toString())
@@ -42,6 +60,11 @@ const laraPull = (env: string, laraConfig: LaraConfig) => {
                 const rawData = row.raw_data;
                 delete row.raw_data;
                 row.parsed_data = rawData ? JSON.parse(rawData) : rawData;
+
+                const rawMetadata = row.metadata;
+                delete row.metadata;
+                row.parsed_metadata = rawMetadata ? JSON.parse(rawMetadata) : rawMetadata;
+
                 return row;
               })
               writeFile(env, "lara-irs.json", parsedResults)

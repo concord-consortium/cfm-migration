@@ -4,7 +4,7 @@ import log from "./log";
 import readJSON from "./read-json";
 import writeFile from "./write-file";
 import { Client } from "pg"
-import writeDocstoreFile from "./docstore-file";
+import { writeDocstoreFile } from "./docstore-file";
 
 const docStoreGetContents = (env: string, docStoreConfig: DocStoreConfig) => {
   const {dbHost, dbPassword, dbUser, dbDatabase} = docStoreConfig;

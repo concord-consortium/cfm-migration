@@ -3,12 +3,19 @@ import fs from "fs"
 
 import die from "./die"
 
-export interface LaraConfig {
+interface MySqlConfig {
   ecsHost: string
   ecsUser: string
   ecsKey: string
   dbHost: string
   dbPassword: string
+}
+
+export interface LaraConfig extends MySqlConfig {
+  irsIdFilter?: string
+}
+
+export interface LearnConfig extends MySqlConfig {
 }
 
 export interface DocStoreConfig {
@@ -19,10 +26,15 @@ export interface DocStoreConfig {
 }
 
 export interface AWSConfig {
+  bucket: string
+  folder: string
+  accessKeyId: string
+  secretAccessKey: string
 }
 
 export interface EnvConfig {
   lara: LaraConfig
+  learn: LearnConfig
   docStore: DocStoreConfig
   aws: AWSConfig
 }

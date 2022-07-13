@@ -3,11 +3,17 @@ import fs from "fs"
 import mkdirp from "mkdirp"
 import log from "./log";
 
-const writeDocstoreFile = (env: string, id: number, contents: any) => {
+export const writeDocstoreFile = (env: string, id: number, contents: any) => {
   const filePath = path.resolve(__dirname, "../data", env, "docstore", idToSubpath(id));
   mkdirp.sync(path.dirname(filePath))
   log(`Writing ${filePath}`)
-  fs.writeFileSync(filePath, JSON.stringify(contents, null, 2))
+  fs.writeFileSync(filePath, JSON.stringify(contents))
+}
+
+export const readDocstoreFile = (env: string, id: number) => {
+  const filePath = path.resolve(__dirname, "../data", env, "docstore", idToSubpath(id));
+  log(`Reading ${filePath}`)
+  return fs.readFileSync(filePath).toString()
 }
 
 const idToSubpath = (id: number) => {
@@ -16,5 +22,3 @@ const idToSubpath = (id: number) => {
   const [a, b, c, ...rest] = padded.split("")
   return path.join(a, b, c, rest.join("")) + ".json"
 }
-
-export default writeDocstoreFile

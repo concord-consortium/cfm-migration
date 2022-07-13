@@ -3,8 +3,10 @@ import arg from "arg"
 
 import die from "./die"
 import laraPull from "./lara-pull"
+import learnPull from "./learn-pull"
 import docStoreGetSizes from "./docstore-get-sizes"
 import docStoreGetContents from "./docstore-get-contents"
+import awsUpload from "./aws-upload"
 
 const args = arg({
   "--env": String,
@@ -39,7 +41,21 @@ switch (step) {
     }
     docStoreGetContents(env, config[env].docStore);
     break
+
+  case "aws-upload":
+    if (!config[env].aws) {
+      die(`No [${env}.aws] config found`)
+    }
+    awsUpload(env, config[env].aws);
+    break
   
+  case "learn-pull":
+    if (!config[env].learn) {
+      die(`No [${env}.learn] config found`)
+    }
+    learnPull(env, config[env].learn);
+    break
+    
   default:
     die(`Unknown --step: ${step}`)
 }
