@@ -4,6 +4,7 @@ import log from "./log";
 import { connect } from "./mysql-via-ssh";
 import writeFile from "./write-file";
 
+//  or mw.url like '%https://codap.concord.org/app/static%'
 const fromCommonMWInteractivesSql = `
   from mw_interactives mw, page_items pi, interactive_pages ip, lightweight_activities la 
   where (mw.url like '%document-store.concord.org%' or mw.url like '%autolaunch.html%') and pi.embeddable_type = 'MwInteractive' and pi.embeddable_id = mw.id 

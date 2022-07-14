@@ -3,10 +3,11 @@ import arg from "arg"
 
 import die from "./die"
 import laraPull from "./lara-pull"
-import learnPull from "./learn-pull"
 import docStoreGetSizes from "./docstore-get-sizes"
 import docStoreGetContents from "./docstore-get-contents"
 import awsUpload from "./aws-upload"
+import firestoreCreate from "./firestore-create"
+import laraUpdate from "./lara-update"
 
 const args = arg({
   "--env": String,
@@ -49,13 +50,17 @@ switch (step) {
     awsUpload(env, config[env].aws);
     break
   
-  case "learn-pull":
-    if (!config[env].learn) {
-      die(`No [${env}.learn] config found`)
-    }
-    learnPull(env, config[env].learn);
+  case "firestore-create":
+    firestoreCreate(env)
     break
-    
+  
+  case "lara-update":
+    if (!config[env].lara) {
+      die(`No [${env}.lara] config found`)
+    }
+    laraUpdate(env, config[env].lara);
+    break
+
   default:
     die(`Unknown --step: ${step}`)
 }

@@ -15,9 +15,6 @@ export interface LaraConfig extends MySqlConfig {
   irsIdFilter?: string
 }
 
-export interface LearnConfig extends MySqlConfig {
-}
-
 export interface DocStoreConfig {
   dbHost: string
   dbPassword: string
@@ -34,7 +31,6 @@ export interface AWSConfig {
 
 export interface EnvConfig {
   lara: LaraConfig
-  learn: LearnConfig
   docStore: DocStoreConfig
   aws: AWSConfig
 }
