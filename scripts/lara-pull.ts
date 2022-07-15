@@ -11,7 +11,7 @@ const fromCommonMWInteractivesSql = `
     and pi.interactive_page_id = ip.id 
     and ip.lightweight_activity_id = la.id
 `
-const getMWInteractivesInfoSql = `select la.id as activityId, la.name as activityName, mw.id as mwId, mw.url as mwUrl ${fromCommonMWInteractivesSql}`
+const getMWInteractivesInfoSql = `select la.id as activityId, la.name as activityName, la.runtime, mw.id as mwId, mw.url as mwUrl ${fromCommonMWInteractivesSql}`
 
 const getAllRunStatesSql = `
   select irs.id, irs.interactive_id, irs.raw_data, irs.metadata, r.key as run_key, u.email, r.context_id, r.platform_id, r.platform_user_id

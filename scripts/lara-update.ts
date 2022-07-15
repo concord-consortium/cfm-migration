@@ -52,9 +52,29 @@ const laraUpdate = async (env: string, laraConfig: LaraConfig) => {
 
   writeFile(env, "lara-mwurls-to-convert.json", urlsToConvert)
 
+  for await (const id of Object.keys(urlsToConvert)) {
+    const mwSql = `update mw_interactives set has_report_url = false, url = '${urlsToConvert[id].toUrl}' where id = ${id};`
+    console.log(mwSql)
+  }
+
+  for await (const key of keys) {
+    const {irsId, run_key, platform_id, platform_user_id, firestore} = firestoreInfo[key]
+    const ownerId = platform_user_id ? `${platform_id}/users/${platform_user_id}` : run_key
+
+    let folder = `"id":"${key}","ownerId":"${ownerId}"`
+    if (firestore.accessRules[0].readWriteToken) {
+      folder += `,"readWriteToken":"${firestore.accessRules[0].readWriteToken}"`
+    }
+    
+    const irsSql = `update interactive_run_states set raw_data = '{"__attachment__":"file.json","contentType":"application/json"}', metadata = '{"attachments":{"file.json":{"folder":{${folder}},"publicPath":"interactive-attachments/${key}/file.json","contentType":"application/json"}}}' where id = ${irsId};`
+    console.log(irsSql)
+  }
+
+      /*
+
   connect({ecsHost, ecsUser, ecsKey, dbHost, dbPassword})
     .then(([conn, done]) => {
-      /*
+
       TODO: change to async version of mysql (https://www.npmjs.com/package/mysql2-async)
 
       conn.beginTransaction(err => {
@@ -84,13 +104,13 @@ const laraUpdate = async (env: string, laraConfig: LaraConfig) => {
 
         done()
       });
-      */
 
       done()
     })
     .catch(err => {
       console.error(err)
     })
+  */
 };
 
 export default laraUpdate;
