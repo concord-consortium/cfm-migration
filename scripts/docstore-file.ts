@@ -10,13 +10,13 @@ export const writeDocstoreFile = (env: string, id: number, contents: any) => {
   fs.writeFileSync(filePath, JSON.stringify(contents))
 }
 
-export const readDocstoreFile = (env: string, id: number) => {
+export const readDocstoreFile = (env: string, id: number|string) => {
   const filePath = path.resolve(__dirname, "../data", env, "docstore", idToSubpath(id));
   log(`Reading ${filePath}`)
   return fs.readFileSync(filePath).toString()
 }
 
-const idToSubpath = (id: number) => {
+const idToSubpath = (id: number|string) => {
   const padded = String(id).padStart(6, "0")
   console.log(padded)
   const [a, b, c, ...rest] = padded.split("")

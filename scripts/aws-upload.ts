@@ -12,8 +12,8 @@ const awsUpload = async (env: string, awsConfig: AWSConfig) => {
     die("MISSING FOLDER!")
   }
 
-  const docStoreSizes = readJSON(env, "docstore-sizes.json")
-  const recordIds: number[] = docStoreSizes.map((row: any) => row.id)
+  const laraIdsIdsToDocIds = readJSON(env, "lara-irs-to-doc-ids")
+  const laraIrsIds = Object.keys(laraIdsIdsToDocIds)
 
   const client = new S3Client({
     region:'us-east-1',
@@ -23,9 +23,10 @@ const awsUpload = async (env: string, awsConfig: AWSConfig) => {
     }
   });
 
-  for await (const id of recordIds) {
-    const key = `${folder}/cfm-migrate-${id}/file.json`
-    const body = readDocstoreFile(env, id)
+  for await (const laraIrsId of laraIrsIds) {
+    const recordid = laraIdsIdsToDocIds[laraIrsId]
+    const key = `${folder}/cfm-migrate-${laraIrsId}-${recordid}/file.json`
+    const body = readDocstoreFile(env, laraIrsId)
 
     log(`Uploading ${key}`)
 

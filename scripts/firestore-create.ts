@@ -10,27 +10,21 @@ const firestoreCreate = async (env: string) => {
   
   // load the lara-irs.json for the environment
   const irsJson = readJSON(env, "lara-irs.json")
-  const docStoreSizes = readJSON(env, "docstore-sizes.json")
-  const recordIds = docStoreSizes.map((row: any) => row.id)  
+  const laraIdsIdsToDocIds = readJSON(env, "lara-irs-to-doc-ids")
+  const laraIrsIds = Object.keys(laraIdsIdsToDocIds)
 
-  // find all the records ids
-  log("Gathering map of recordids to irs info")
-  const recordMap: Record<number, any> = {}
-  irsJson.forEach((row:any) => {
-    const recordid = row.parsed_data?.docStore?.recordid
-    if (recordid && recordIds.indexOf(recordid) !== -1) {
-      if (recordMap[recordid]) {
-        console.error("DUPLICATE RECORD ID:", recordid)
-      }
-      recordMap[recordid] = row
+  const laraIrsMap: Record<number, any> = {}
+  irsJson.forEach((row: any) => {
+    if (laraIdsIdsToDocIds[row.id]) {
+      laraIrsMap[row.id] = row
     }
   })
 
   const results: any = {}
-  Object.keys(recordMap).forEach((recordid: any) => {
-    const record = recordMap[recordid]
-    const {id, interactive_id, run_key, context_id, platform_id, platform_user_id} = record
-    const key = `cfm-migrate-${recordid}`
+  laraIrsIds.forEach((laraIrsId: any) => {
+    const {id, interactive_id, run_key, context_id, platform_id, platform_user_id} = laraIrsMap[laraIrsId]
+    const recordid = laraIdsIdsToDocIds[laraIrsId]
+    const key = `cfm-migrate-${laraIrsId}-${recordid}`
     results[key] = {
       irsId: id,
       run_key,
@@ -56,7 +50,7 @@ const firestoreCreate = async (env: string) => {
           }
         ],
         description: "cfm migrated attachment",
-        name: `cfm-migrated-${recordid}`,
+        name: key,
         tool: "interactive-attachments",
         type: "s3Folder"
       }
@@ -72,7 +66,7 @@ const firestoreCreate = async (env: string) => {
           }
         ],
         description: "cfm migrated attachment",
-        name: `cfm-migrated-${recordid}-${run_key ? run_key : "no-run-key"}`,
+        name: `${key}-${run_key ? run_key : "no-run-key"}`,
         tool: "interactive-attachments",
         type: "s3Folder"
       }
@@ -81,6 +75,7 @@ const firestoreCreate = async (env: string) => {
 
   writeFile(env, "firestore-info.json", results)
 
+  /*
   admin.initializeApp({
     credential: admin.credential.cert(readKey(env, "token-service"))
   });
@@ -100,6 +95,7 @@ const firestoreCreate = async (env: string) => {
     }
   }
 
+  */
   log("Done!")
 };
 

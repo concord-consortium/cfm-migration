@@ -22,23 +22,53 @@ const laraUpdate = async (env: string, laraConfig: LaraConfig) => {
 
     if (fromUrl && !urlsToConvert[mwId]) {
       let toUrl: string|null = null
-      if (fromUrl.match(/https:\/\/cloud-file-manager\.concord.org\/autolaunch\/autolaunch\.html/)) {
+      const parsedFromUrl = new URL(fromUrl)
+
+      // if (fromUrl.match(/https:\/\/cloud-file-manager\.concord.org\/autolaunch\/autolaunch\.html/)) {
+      if ((parsedFromUrl.hostname === "document-store.concord.org") || (parsedFromUrl.hostname === "cloud-file-manager.concord.org") && parsedFromUrl.pathname.includes("autolaunch.html")) {
         const {searchParams: fromSearchParams} = new URL(fromUrl)
         const server = fromSearchParams.get("server")
         if (server) {
-          const scaling = fromSearchParams.get("scaling")
+          // some of the urls have spaces after scaling so need to check each key
+          let scalingKey: string|null = null
+          for (const key of fromSearchParams.keys()) {
+            if (key.trim() === "scaling") {
+              scalingKey = key;
+            }
+          }
+          const hasScaling = scalingKey !== null
+          
           // TODO: what about scaling?
+
           fromSearchParams.delete("server")
-          fromSearchParams.delete("scaling")
+          if (scalingKey) {
+            fromSearchParams.delete(scalingKey)
+          }
 
           const serverUrl = new URL(server)
           const {searchParams: serverSearchParams} = serverUrl
-          serverSearchParams.set("interactiveApi", "attachment")
+          serverSearchParams.set("interactiveApi", "")
           fromSearchParams.forEach((value, name) => {
             serverSearchParams.set(name, value)
           })
-          toUrl = serverUrl.toString()
+
+          toUrl = serverUrl.toString().replace("interactiveApi=", "interactiveApi") // to remove trailing equals
+          if (hasScaling) {
+            const fullScreenUrl = new URL("https://models-resources.concord.org/question-interactives/full-screen/")
+            fullScreenUrl.searchParams.set("wrappedInteractive", toUrl)
+            toUrl = fullScreenUrl.toString()
+          }
         }
+      } else if (parsedFromUrl.hostname === "document-store.concord.org") {
+        const matches = parsedFromUrl.pathname.match(/\/v2\/documents\/(\d+)\/launch/)
+        // console.log(fromUrl)
+        if (matches) {
+
+        } else {
+          console.error("UNHANDLED URL", parsedFromUrl.pathname);
+        }
+      } else {
+        console.error("UNHANDLED URL", fromUrl)
       }
 
       if (toUrl) {
@@ -49,6 +79,8 @@ const laraUpdate = async (env: string, laraConfig: LaraConfig) => {
       }
     }
   }
+  
+  /*
 
   writeFile(env, "lara-mwurls-to-convert.json", urlsToConvert)
 
@@ -69,6 +101,7 @@ const laraUpdate = async (env: string, laraConfig: LaraConfig) => {
     const irsSql = `update interactive_run_states set raw_data = '{"__attachment__":"file.json","contentType":"application/json"}', metadata = '{"attachments":{"file.json":{"folder":{${folder}},"publicPath":"interactive-attachments/${key}/file.json","contentType":"application/json"}}}' where id = ${irsId};`
     console.log(irsSql)
   }
+  */
 
       /*
 

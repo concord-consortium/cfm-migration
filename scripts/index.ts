@@ -8,6 +8,8 @@ import docStoreGetContents from "./docstore-get-contents"
 import awsUpload from "./aws-upload"
 import firestoreCreate from "./firestore-create"
 import laraUpdate from "./lara-update"
+import categorizeUrls from "./categorize-urls"
+import mapDocIds from "./map-doc-ids"
 
 const args = arg({
   "--env": String,
@@ -43,6 +45,10 @@ switch (step) {
     docStoreGetContents(env, config[env].docStore);
     break
 
+  case "map-doc-ids":
+    mapDocIds(env)
+    break
+    
   case "aws-upload":
     if (!config[env].aws) {
       die(`No [${env}.aws] config found`)
@@ -59,6 +65,10 @@ switch (step) {
       die(`No [${env}.lara] config found`)
     }
     laraUpdate(env, config[env].lara);
+    break
+
+  case "categorize-urls":
+    categorizeUrls(env);
     break
 
   default:
