@@ -26,7 +26,7 @@ const awsUpload = async (env: string, awsConfig: AWSConfig) => {
   for await (const laraIrsId of laraIrsIds) {
     const recordid = laraIdsIdsToDocIds[laraIrsId]
     const key = `${folder}/cfm-migrate-${laraIrsId}-${recordid}/file.json`
-    const body = readDocstoreFile(env, laraIrsId)
+    const body = readDocstoreFile(env, recordid)
 
     log(`Uploading ${key}`)
 

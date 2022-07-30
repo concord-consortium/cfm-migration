@@ -10,6 +10,8 @@ import firestoreCreate from "./firestore-create"
 import laraUpdate from "./lara-update"
 import categorizeUrls from "./categorize-urls"
 import mapDocIds from "./map-doc-ids"
+import resolveLegacyUrls from "./resolve-legacy-urls"
+import computeNewMWUrls from "./compute-new-mw-urls"
 
 const args = arg({
   "--env": String,
@@ -69,6 +71,14 @@ switch (step) {
 
   case "categorize-urls":
     categorizeUrls(env);
+    break
+
+  case "resolve-legacy-urls":
+    resolveLegacyUrls(env);
+    break
+
+  case "compute-new-mw-urls":
+    computeNewMWUrls(env)
     break
 
   default:

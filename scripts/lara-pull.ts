@@ -6,15 +6,21 @@ import writeFile from "./write-file";
 
 //  or mw.url like '%https://codap.concord.org/app/static%'
 const fromCommonMWInteractivesSql = `
-  from mw_interactives mw, page_items pi, interactive_pages ip, lightweight_activities la 
-  where (mw.url like '%document-store.concord.org%' or mw.url like '%autolaunch.html%') and pi.embeddable_type = 'MwInteractive' and pi.embeddable_id = mw.id 
-    and pi.interactive_page_id = ip.id 
-    and ip.lightweight_activity_id = la.id
+  from mw_interactives mw
+  left join page_items pi on (pi.embeddable_type = 'MwInteractive' and pi.embeddable_id = mw.id)
+  left join interactive_pages ip on pi.interactive_page_id = ip.id 
+  left join lightweight_activities la on ip.lightweight_activity_id = la.id
+  left join lightweight_activities_sequences la_seq on la_seq.lightweight_activity_id = la.id
+  left join sequences seq on seq.id = la_seq.sequence_id
+  where (mw.url like '%document-store.concord.org%' or mw.url like '%cloud-file-manager.concord.org%')
 `
-const getMWInteractivesInfoSql = `select la.id as activityId, la.name as activityName, la.runtime, mw.id as mwId, mw.url as mwUrl ${fromCommonMWInteractivesSql}`
+const getMWInteractivesInfoSql = `
+  select seq.id as sequenceId, seq.title as sequenceTitle, la.id as activityId, la.name as activityName, mw.id as mwId, mw.url as mwUrl,
+  mw.aspect_ratio_method as aspectRatioMethod, mw.native_width as nativeWidth, mw.native_height as nativeHeight ${fromCommonMWInteractivesSql}
+`
 
 const getAllRunStatesSql = `
-  select irs.id, irs.interactive_id, irs.raw_data, irs.metadata, r.key as run_key, u.email, r.context_id, r.platform_id, r.platform_user_id
+  select irs.id, irs.interactive_id, irs.raw_data, irs.metadata, r.key as run_key, u.email, r.context_id, r.platform_id, r.platform_user_id, irs.created_at, irs.updated_at
   from interactive_run_states irs
   left join runs r on irs.run_id = r.id
   left join users u on r.user_id = u.id

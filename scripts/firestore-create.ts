@@ -75,7 +75,6 @@ const firestoreCreate = async (env: string) => {
 
   writeFile(env, "firestore-info.json", results)
 
-  /*
   admin.initializeApp({
     credential: admin.credential.cert(readKey(env, "token-service"))
   });
@@ -83,6 +82,8 @@ const firestoreCreate = async (env: string) => {
     timestampsInSnapshots: true   // this removes a deprecation warning
   });
   const db = admin.firestore();
+
+  const wait = () => new Promise(resolve => setTimeout(resolve, 10))
 
   const keys = Object.keys(results)
   for await (const key of keys) {
@@ -93,9 +94,9 @@ const firestoreCreate = async (env: string) => {
     } catch (e) {
       console.error(`Unable to create firestore doc:`, e)
     }
+    await wait()
   }
 
-  */
   log("Done!")
 };
 

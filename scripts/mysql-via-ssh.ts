@@ -53,7 +53,7 @@ export const connect = (options: ConnectOptions) => {
             ...dbServer,
             stream
           };
-          log("Creating mysql pool")
+          log("Creating mysql pool using", JSON.stringify(dbServer, null, 2))
           const pool =  mysql.createPool(updatedDbServer);
           resolve([pool, () => {
             log("Closing mysql pool and ssh client")
