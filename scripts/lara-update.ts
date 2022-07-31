@@ -29,23 +29,31 @@ const laraUpdate = async (env: string, laraConfig: LaraConfig) => {
 
   connect({ecsHost, ecsUser, ecsKey, dbHost, dbPassword})
     .then(async ([conn, done]) => {
+      let i = 1
+      let numRows = mwUrls.length
 
-      log(`Updating ${mwUrls.length} mw_interactives`)
+      log(`Updating ${numRows} mw_interactives`)
 
       for await (const row of mwUrls) {
+        let logLine = `${i} of ${numRows} (${row.mwId})`
         if (row.finalUrl) {
           if (row.finalUrl !== row.mwUrl) {
             const mwSql = `UPDATE mw_interactives SET updated_at = now(), has_report_url = false, url = ? WHERE id = ?;`
             const results = await promiseQuery(conn, mwSql, [row.finalUrl, row.mwId])
-            log(`Updated ${row.mwId}: ${results.info}`)
+            log(`Updated ${logLine}: ${results.info}`)
             await wait()
           } else {
-            log(`Skipping ${row.mwId} - SAME finalUrl`)  
+            log(`Skipping ${logLine} - SAME finalUrl`)  
           }
         } else {
-          log(`Skipping ${row.mwId} - NO finalUrl`)
+          log(`Skipping ${logLine} - NO finalUrl`)
         }
+        i++
       }
+
+      i = 1
+      numRows = keys.length
+      log(`Updating ${numRows} keys`)
     
       for await (const key of keys) {
         const {irsId, run_key, platform_id, platform_user_id, firestore} = firestoreInfo[key]
@@ -58,7 +66,7 @@ const laraUpdate = async (env: string, laraConfig: LaraConfig) => {
         
         const irsSql = `UPDATE interactive_run_states SET updated_at = now(), raw_data = '{"__attachment__":"file.json","contentType":"application/json"}', metadata = '{"attachments":{"file.json":{"folder":{${folder}},"publicPath":"interactive-attachments/${key}/file.json","contentType":"application/json"}}}' WHERE id = ?`
         const results = await promiseQuery(conn, irsSql, [irsId])
-        console.log(results)
+        log(`Updated ${i} of ${numRows} (${irsId}): ${results.info}`)
         await wait()
       }
 
