@@ -68,6 +68,7 @@ const laraUpdate = async (env: string, laraConfig: LaraConfig) => {
         const results = await promiseQuery(conn, irsSql, [irsId])
         log(`Updated ${i} of ${numRows} (${irsId}): ${results.info}`)
         await wait()
+        i++
       }
 
       done()
