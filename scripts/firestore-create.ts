@@ -86,9 +86,11 @@ const firestoreCreate = async (env: string) => {
   const wait = () => new Promise(resolve => setTimeout(resolve, 10))
 
   const keys = Object.keys(results)
+  const numKeys = keys.length
+  let i = 1
   for await (const key of keys) {
     try {
-      log(`Creating ${key}`)
+      log(`Creating ${i++} of ${numKeys}: ${key}`)
       const docRef = db.collection(`${env}:resources`).doc(key);
       await docRef.set(results[key].firestore)
     } catch (e) {
