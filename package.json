@@ -14,7 +14,7 @@
     "staging:step8": "ts-node scripts/index.ts --env=staging --step=firestore-create",
     "staging:step9": "ts-node scripts/index.ts --env=staging --step=lara-update",
 
-    
+
     "production:step1": "ts-node scripts/index.ts --env=production --step=lara-pull",
     "production:step2": "ts-node scripts/index.ts --env=production --step=resolve-legacy-urls",
     "production:step3": "ts-node scripts/index.ts --env=production --step=compute-new-mw-urls",
@@ -24,7 +24,9 @@
     "production:step7": "ts-node scripts/index.ts --env=production --step=aws-upload",
     "production:step8": "ts-node scripts/index.ts --env=production --step=firestore-create",
     "production:step9": "ts-node scripts/index.ts --env=production --step=lara-update",
-    "production:categorize-urls": "ts-node scripts/index.ts --env=production --step=categorize-urls"
+    "production:categorize-urls": "ts-node scripts/index.ts --env=production --step=categorize-urls",
+
+    "production:docstore-shutdown": "ts-node scripts/index.ts --env=production --step=docstore-shutdown"
   },
   "author": "",
   "license": "ISC",

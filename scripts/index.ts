@@ -12,6 +12,7 @@ import categorizeUrls from "./categorize-urls"
 import mapDocIds from "./map-doc-ids"
 import resolveLegacyUrls from "./resolve-legacy-urls"
 import computeNewMWUrls from "./compute-new-mw-urls"
+import docstoreShutdown from "./docstore-shutdown"
 
 const args = arg({
   "--env": String,
@@ -50,18 +51,18 @@ switch (step) {
   case "map-doc-ids":
     mapDocIds(env)
     break
-    
+
   case "aws-upload":
     if (!config[env].aws) {
       die(`No [${env}.aws] config found`)
     }
     awsUpload(env, config[env].aws);
     break
-  
+
   case "firestore-create":
     firestoreCreate(env)
     break
-  
+
   case "lara-update":
     if (!config[env].lara) {
       die(`No [${env}.lara] config found`)
@@ -79,6 +80,13 @@ switch (step) {
 
   case "compute-new-mw-urls":
     computeNewMWUrls(env)
+    break
+
+  case "docstore-shutdown":
+    if (!config[env].lara) {
+      die(`No [${env}.lara] config found`)
+    }
+    docstoreShutdown(env, config[env].lara);
     break
 
   default:
